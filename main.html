@@ -1,0 +1,151 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Blockchain Vote App</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12"><h2>Hyperledger Composer Vote Application</h2></div>
+      <div class="col-sm-12 row" id="dvAlert"></div>
+      <div class="col-sm-12 row d-flex justify-content-center" id="dvCandidates"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalResult" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+              <canvas id="resultChart" width="100px" height="100px"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!--
+<form action="/" id="searchForm">
+  <input type="text" id="id" placeholder="Search...">
+  <input type="button" id="btnGet" value="Search">
+</form>
+<div id="result">
+	<h3 id="responseHeader"></h3>
+</div>
+-->
+ 
+<script>
+var candidateList = [];
+$(document).ready(function(){
+  $.get("http://localhost:3000/api/Candidate", function(data){
+    var html = '';
+    for(i=0;i<data.length;i++){
+      candidateList.push(data[i]);
+
+      html += '<div class="col-sm-4" style="text-align: center; padding: 5px; border-style: solid; border-width: 2px;">';
+      html += '<img src="image/user.png" class="rounded mx-auto d-block" style="width: 100px; height: 100px;">';
+      html += '<a class="btn btn-primary candidateSelect" data-name="' + data[i].firstName + '" data-value="' + data[i].candidateId + '" style="margin-top: 2px;">' + data[i].firstName + ' ' + data[i].lastName + '</a></div>';
+    }
+    $("#dvCandidates").empty();
+    $("#dvCandidates").html(html);
+
+    $(".candidateSelect").on("click", function(){
+      var candidateID = $(this).data("value");
+      var candidateName = $(this).data("name");
+
+      var param = {
+        "$class": "org.example.empty.VoteLog",
+        "voteID": new Date().getTime().toString(),
+        "candidate": "resource:org.example.empty.Candidate#" + candidateName,
+        "transactionId": null,
+        "timestamp": new Date().toString()
+      };
+      
+      $.post("http://localhost:3000/api/VoteLog/", param, function(data){
+        $("#dvAlert").html('<div class="alert alert-success" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Success!</strong> You have used your vote in successfully!  </div>');
+          window.setTimeout(function() {
+            $(".alert").fadeTo(500, 0).slideUp(500, function(){
+              $(this).remove(); 
+            });
+          }, 4000);
+        
+        setTimeout(getResults, 500);
+      });
+    });
+  });
+});
+
+function getResults(){
+  var dataArr = [];
+  var backgroundColorArr = [];
+  var borderArr = [];
+  var labelsArr = [];
+  var colorArr = ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)'];
+
+  for(var i=0;i<candidateList.length;i++){
+    dataArr.push(0);
+    labelsArr.push(candidateList[i].firstName + " " + candidateList[i].lastName);
+    backgroundColorArr.push(colorArr[i%2]);
+    borderArr.push(colorArr[i%2]);
+  }
+
+  $.get("http://localhost:3000/api/Vote", function(data){
+    for(var i=0;i<data.length;i++){
+      for(var j=0;j<candidateList.length;j++){
+        if(data[i].candidate == 'resource:org.example.empty.Candidate#' + candidateList[j].firstName){
+          var count = dataArr[j] + 1;
+          dataArr[j] = count;
+        }
+      }
+    }
+  });
+
+  setTimeout(function(){
+    var ctx = document.getElementById("resultChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labelsArr,
+      datasets: [{
+        label: '# of Votes',
+        data: dataArr,
+        backgroundColor: backgroundColorArr,
+        borderColor: borderArr,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+  }, 500);
+
+  setTimeout(function(){$("#modalResult").modal("show");}, 700);
+}
+
+
+/*
+$("#btnGet").on("click", function(){
+	debugger;
+	$.post( "http://localhost:3000/api/Candidate/",{
+  "$class": "org.example.empty.Candidate",
+  "candidateId": "3",
+  "firstName": "candidate3",
+  "lastName": "3"
+});
+});
+*/
+
+</script>
+ 
+</body>
+</html>
