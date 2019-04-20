@@ -6,8 +6,10 @@ class VoteButton extends Component{
     }
 
     render(){
+        const style= this.props.hide == '1' ? {'display': 'none'} :{};
+
         return(
-            <a href="#" class="btn btn-primary" onClick={() => this.handleClick()}>Vote</a>
+            <a href="#" class="btn btn-primary" style={style} onClick={() => this.handleClick()}>Vote</a>
         );
     }
 }
@@ -67,7 +69,9 @@ class BECard extends Component {
     const {error, success, isLoaded, items} = this.state;
     
     var successMessage;
+    var hideBtn = 0;
     if(success){
+        hideBtn = 1;
         successMessage = (
         <div class="alert alert-success col-sm-6" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -93,7 +97,7 @@ class BECard extends Component {
                         <div class="card col-sm-3" style={styleCard}>
                             <div class="card-body">
                                 <h5 class="card-title">{item["firstName"]} {item["lastName"]}</h5>
-                                <VoteButton firstname={item["firstName"]} parentState={this} parentMethod={this.addNewVote}/>
+                                <VoteButton hide={hideBtn} firstname={item["firstName"]} parentState={this} parentMethod={this.addNewVote}/>
                             </div>
                         </div>
                     );
