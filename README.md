@@ -1,7 +1,15 @@
 # Blockchain Based Vote Application On Hyperledger Composer
-This is basic Vote Application that used Hyperledger Composer as Blockchain environment. The result is shown whenever any candidate
-is selected as vote. Candidates select their vote from a web application that used Hyperledger Composer's Rest API. Our work runs on
-Ubuntu.
+This is basic Vote Application that is developed on Hyperledger Composer as Blockchain environment. 
+
+### [UPDATE] ReactJS Version:
+ReactJS version of the application is placed in /vote-network folder. User signs in to system and select which candidate they want.
+Creating new candidate or deleting an existing candidate are exist in Candidate tab. Since user needs to login system, Candidate and Vote tabs redirect to Login screen if the user doesn't authenticate to system. This application also uses Hyperledger Composer's Rest API and runs on Ubuntu.
+
+![alt text](image/outputreact.gif)
+
+
+### JQuery Version:
+The result is shown whenever any candidate is selected as vote. Candidates select their vote from a web application that used Hyperledger Composer's Rest API. Our work runs on Ubuntu.
 
 ![alt text](image/outputonlinevideocuttercom.gif)
 
